@@ -1,25 +1,35 @@
-import logo from './logo.svg';
-import './App.css';
+import "./App.css";
+import React, { useEffect } from "react";
+import { TextField } from "@material-ui/core";
+import socketIOClient from "socket.io-client";
 
-function App() {
+const apiUrl = process.env.REACT_APP_API_URL;
+
+const App = () => {
+  useEffect(() => {
+    const socket = socketIOClient(apiUrl);
+    socket.on("connect", () => {
+      console.log("connected");
+    });
+  }, []);
+
   return (
     <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+      <h1>Story Time!</h1>
+      <h2>The story so far...</h2>
+      <div>
+        <TextField
+          id="outlined-multiline-static"
+          label="And then..."
+          multiline
+          rows={4}
+          placeholder="What happens next?"
+          variant="outlined"
+          fullWidth
+        />
+      </div>
     </div>
   );
-}
+};
 
 export default App;
