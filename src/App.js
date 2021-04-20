@@ -5,11 +5,23 @@ import socketIOClient from "socket.io-client";
 
 const apiUrl = process.env.REACT_APP_API_URL;
 
+const client = socketIOClient(apiUrl);
+
+const sendText = (text) => {
+  client.emit("newText", {
+    text: text,
+    clientId: client.id,
+  });
+};
+
 const App = () => {
   useEffect(() => {
-    const socket = socketIOClient(apiUrl);
-    socket.on("connect", () => {
-      console.log("connected");
+    client.on("connect", () => {
+      console.log(client.id);
+    });
+
+    client.on("currentSubmission", ({ text, clientId }) => {
+      console.log(text);
     });
   }, []);
 
@@ -26,6 +38,7 @@ const App = () => {
           placeholder="What happens next?"
           variant="outlined"
           fullWidth
+          onChange={(e) => sendText(e.target.value)}
         />
       </div>
     </div>
