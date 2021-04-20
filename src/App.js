@@ -62,6 +62,13 @@ const App = () => {
           disabled={!myTurn}
         />
       </div>
+      <div>
+        <p>
+          {myTurn
+            ? "It's your turn, type something!"
+            : "Other players are typing, watch them go!"}
+        </p>
+      </div>
     </div>
   );
 };
