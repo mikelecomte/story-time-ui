@@ -1,5 +1,5 @@
 import "./App.css";
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { TextField } from "@material-ui/core";
 import socketIOClient from "socket.io-client";
 
@@ -15,13 +15,29 @@ const sendText = (text) => {
 };
 
 const App = () => {
+  const [myTurn, setMyTurn] = useState(false);
+  const [submissions, setSubmissions] = useState([]);
+  const [currentSubmission, setCurrentSubmission] = useState("");
+
   useEffect(() => {
     client.on("connect", () => {
-      console.log(client.id);
+      console.log("connect", client.id);
     });
 
     client.on("currentSubmission", ({ text, clientId }) => {
-      console.log(text);
+      setCurrentSubmission(text);
+      console.log("currentSubmission", text);
+    });
+
+    client.on("nextTurn", (data) => {
+      console.log("nextTurn", data);
+
+      setMyTurn(client.id === data);
+    });
+
+    client.on("submissions", (data) => {
+      setSubmissions(data);
+      console.log("submissions", data);
     });
   }, []);
 
@@ -29,6 +45,9 @@ const App = () => {
     <div className="App">
       <h1>Story Time!</h1>
       <h2>The story so far...</h2>
+      {submissions.map((s) => (
+        <ul>{s.text}</ul>
+      ))}
       <div>
         <TextField
           id="outlined-multiline-static"
@@ -39,6 +58,7 @@ const App = () => {
           variant="outlined"
           fullWidth
           onChange={(e) => sendText(e.target.value)}
+          disabled={!myTurn}
         />
       </div>
     </div>
