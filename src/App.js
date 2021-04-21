@@ -11,6 +11,7 @@ const App = () => {
   const [mySubmission, setMySubmission] = useState("");
   const [submissions, setSubmissions] = useState([]);
   const [remoteSubmission, setRemoteSubmission] = useState("");
+  const [error, setError] = useState("");
 
   const sendText = (text) => {
     setMySubmission(text);
@@ -37,38 +38,48 @@ const App = () => {
     client.on("submissions", (data) => {
       setSubmissions(data);
     });
+
+    client.on("error", (data) => {
+      setError(data);
+    });
   }, []);
 
   return (
     <div className="App">
       <h1>Story Time!</h1>
-      <h2>The story so far...</h2>
-      {submissions.map((s) => (
-        <ul key={s.submissionId}>
-          <p style={{ color: s.colour }}>{s.text}</p>
-        </ul>
-      ))}
-      <div>
-        <TextField
-          id="outlined-multiline-static"
-          label="And then..."
-          multiline
-          rows={4}
-          placeholder="What happens next?"
-          variant="outlined"
-          fullWidth
-          value={myTurn ? mySubmission : remoteSubmission}
-          onChange={(e) => sendText(e.target.value)}
-          disabled={!myTurn}
-        />
-      </div>
-      <div>
-        <p>
-          {myTurn
-            ? "It's your turn, type something!"
-            : "Other players are typing, watch them go!"}
-        </p>
-      </div>
+      {error ? (
+        <p>{error}</p>
+      ) : (
+        <>
+          <h2>The story so far...</h2>
+          {submissions.map((s) => (
+            <ul key={s.submissionId}>
+              <p style={{ color: s.colour }}>{s.text}</p>
+            </ul>
+          ))}
+          <div>
+            <TextField
+              id="outlined-multiline-static"
+              label="And then..."
+              multiline
+              rows={4}
+              placeholder="What happens next?"
+              variant="outlined"
+              fullWidth
+              value={myTurn ? mySubmission : remoteSubmission}
+              onChange={(e) => sendText(e.target.value)}
+              disabled={!myTurn}
+            />
+          </div>
+          <div>
+            <p>
+              {myTurn
+                ? "It's your turn, you have 10 seconds to type something!"
+                : "Other players are typing, watch them go!"}
+            </p>
+          </div>{" "}
+        </>
+      )}
     </div>
   );
 };
