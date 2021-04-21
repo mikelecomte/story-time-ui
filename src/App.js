@@ -1,5 +1,5 @@
 import "./App.css";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { TextField } from "@material-ui/core";
 import socketIOClient from "socket.io-client";
 
@@ -11,14 +11,13 @@ const App = () => {
   const [mySubmission, setMySubmission] = useState("");
   const [submissions, setSubmissions] = useState([]);
   const [remoteSubmission, setRemoteSubmission] = useState("");
+  const [userCount, setUserCount] = useState(0);
   const [error, setError] = useState("");
+  const storyBottomRef = useRef();
 
-  const sendText = (text) => {
-    setMySubmission(text);
-    client.emit("newText", {
-      text: text,
-    });
-  };
+  useEffect(() => {
+    scrollToBottom();
+  }, [submissions]);
 
   useEffect(() => {
     client.on("connect", () => {
@@ -39,10 +38,25 @@ const App = () => {
       setSubmissions(data);
     });
 
+    client.on("userCount", (data) => {
+      setUserCount(data);
+    });
+
     client.on("error", (data) => {
       setError(data);
     });
   }, []);
+
+  const sendText = (text) => {
+    setMySubmission(text);
+    client.emit("newText", {
+      text: text,
+    });
+  };
+
+  const scrollToBottom = () => {
+    storyBottomRef.current?.scrollIntoView({ behavior: "smooth" });
+  };
 
   return (
     <div className="App">
@@ -51,12 +65,16 @@ const App = () => {
         <p>{error}</p>
       ) : (
         <>
-          <h2>The story so far...</h2>
-          {submissions.map((s) => (
-            <ul key={s.submissionId}>
-              <p style={{ color: s.colour }}>{s.text}</p>
-            </ul>
-          ))}
+          <h2>Current players: {userCount}</h2>
+          <h3>The story so far...</h3>
+          <div className="Story">
+            {submissions.map((s) => (
+              <ul key={s.submissionId}>
+                <p style={{ color: s.colour }}>{s.text}</p>
+              </ul>
+            ))}
+            <div ref={storyBottomRef} />
+          </div>
           <div>
             <TextField
               id="outlined-multiline-static"
@@ -77,7 +95,7 @@ const App = () => {
                 ? "It's your turn, you have 10 seconds to type something!"
                 : "Other players are typing, watch them go!"}
             </p>
-          </div>{" "}
+          </div>
         </>
       )}
     </div>

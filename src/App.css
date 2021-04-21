@@ -1,5 +1,12 @@
 .App {
   text-align: center;
+  width: 95%;
+  margin: 0 auto;
+}
+
+.Story {
+  height: 300px;
+  overflow: auto;
 }
 
 .App-logo {
